@@ -21,6 +21,12 @@ router.post("/todos", async (req, res) => {
   const collection = getClient();
   const { todo } = req.body;
 
+  if (!todo) {
+    return res.status(400).json({ mssg: "no todo found" });
+  }
+
+  todo = JSON.stringify(todo);
+
   const newTodo = await collection.insertOne({ todo, status: false });
   res.status(201).json({ todo, status: false, _id: newTodo.insertedId });
 });
@@ -39,6 +45,10 @@ router.put("/todos/:id", async (req, res) => {
   const _id = new ObjectId(req.params.id);
 
   const { status } = req.body;
+
+  if (typeof status !== Boolean) {
+    return res.status(400).json({ mssg: "invalid status" });
+  }
   const updateTodo = await collection.updateOne(
     { _id },
     { $set: { status: !status } },
